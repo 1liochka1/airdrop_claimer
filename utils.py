@@ -132,7 +132,7 @@ class Account:
         return claim_info
 
     async def get_amount(self):
-        data =  await self.check_eligible()
+        data = await self.check_eligible()
         if not data:
             logger.error(f'{self.acc_info} - не элиджбл для клейма ZK')
             return 0
@@ -173,6 +173,8 @@ class Account:
         data = await self.check_eligible()
         if not data:
             return
+        if self.chain not in data:
+            return
         amount, index, proof = data[self.chain]
         await self.check_gas()
         tx = await self.build_tx('claim', args=(index, self.address, amount, proof))
@@ -210,7 +212,7 @@ class Account:
                 "nonce": await self.w3.eth.get_transaction_count(
                     self.address
                 ),
-                "chainId": 1,
+                "chainId": await self.w3.eth.chain_id,
                 "data": self.get_contract(zk_address, abi=token_abi).encodeABI('transfer',
                                                                                  [Web3.to_checksum_address(self.address_to),
                                                                                   balance])
