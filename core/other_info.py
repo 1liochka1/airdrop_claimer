@@ -18,9 +18,6 @@ with open(get_path('keys.txt', 'wallets_data'), "r") as f:
 with open(get_path('proxies.txt', 'wallets_data'), "r") as f:
     proxies = [row.strip() for row in f]
 
-if not keys:
-    logger.warning('НЕ ВСТАВЛЕНЫ КЛЮЧИ В КЕЙС.ТХТ')
-
 
 def shuffle_wallets(keys_):
     if shuffle_keys:
@@ -41,6 +38,8 @@ def connect_keys():
 
 
 def get_batches():
+    if not keys:
+        logger.warning('НЕ ВСТАВЛЕНЫ КЛЮЧИ В КЕЙС.ТХТ')
     keys_info = connect_keys()
     if proxies:
         proxies_ = proxies

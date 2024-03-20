@@ -1,6 +1,6 @@
 import asyncio
 import sys
-from typing import Type, Union
+from typing import Type
 
 import questionary
 from questionary import Choice
@@ -56,6 +56,8 @@ async def main(project: Type[BaseProject], module):
 
 
 if __name__ == '__main__':
+    print(f'\n{" " * 32}автор - https://t.me/iliocka{" " * 32}\n')
+    print(f'\n{" " * 32}donate - EVM 0xFD6594D11b13C6b1756E328cc13aC26742dBa868{" " * 32}\n')
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
     while True:
@@ -88,5 +90,6 @@ if __name__ == '__main__':
             loop.close()
             sys.exit()
         loop.run_until_complete(main(project, module))
+
 
 
