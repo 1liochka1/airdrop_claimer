@@ -53,7 +53,7 @@ class Account:
 
     async def get_nonce(self):
         try:
-            return self.w3.eth.get_transaction_count(self.address)
+            return await self.w3.eth.get_transaction_count(self.address)
         except Exception as e:
             logger.error(f'{self.acc_info} -{e}')
             return await self.get_nonce()

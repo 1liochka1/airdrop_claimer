@@ -55,6 +55,7 @@ class Memeland(Account, BaseProject):
             logger.error(f'{self.acc_info} - не элиджбл для клейма MEME')
             return
         id_, proof, amount = claim_data
+
         tx = await self.build_tx_with_data(self.contract.address,
                                            data=self.contract.encodeABI('unstake', [amount, [(id_, amount, proof)]]))
         if not tx:
