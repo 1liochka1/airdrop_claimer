@@ -31,6 +31,8 @@ class Memeland(Account, BaseProject):
                 headers=headers)
             if not data:
                 return
+            if not data['rewards']:
+                return
             data = data['rewards'][0]
             return int(data['rewardId']), data['proof'], int(data['amount'])
         except Exception as e:
@@ -50,6 +52,7 @@ class Memeland(Account, BaseProject):
     async def claim(self):
         claim_data = await self.get_proof()
         if not claim_data:
+            logger.error(f'{self.acc_info} - не элиджбл для клейма MEME')
             return
         id_, proof, amount = claim_data
         tx = await self.build_tx_with_data(self.contract.address,

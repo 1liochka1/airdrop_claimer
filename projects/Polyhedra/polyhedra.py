@@ -45,8 +45,10 @@ class Polyhedra(Account, BaseProject):
     async def claim(self):
         data = await self.get_proof()
         if not data:
+            logger.error(f'{self.acc_info} - не элиджбл для клейма ZK')
             return
         if self.chain not in data:
+            logger.error(f'{self.acc_info} - не элиджбл для клейма ZK')
             return
 
         amount, index, proof = data[self.chain]
