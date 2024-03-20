@@ -1,53 +1,92 @@
-
 import asyncio
 import sys
+from typing import Type, Union
 
 import questionary
 from questionary import Choice
 from loguru import logger
 
-from config import claim_chain
-from utils import Account
+from config import claim_chain_polyhedra
+from projects import (
+    Polyhedra, Memeland
+)
+from core.other_info import get_batches
+from core.info import BaseProject
 
 
-async def main(module):
-    with open('keys.txt', "r") as f:
-        keys = [row.strip() for row in f]
-        if not keys:
-            logger.warning('НЕ ВСТАВЛЕНЫ КЛЮЧИ В КЕЙС.ТХТ')
+class Projects:
+    poly = Polyhedra
+    meme = Memeland
+
+async def main(project: Type[BaseProject], module):
+
+    match project:
+        case Projects.poly:
+            token = 'zk'
+            chain = claim_chain_polyhedra
+        case Projects.meme:
+            token = 'meme'
+            chain = 'eth'
+        case _:
+            token = ''
+            chain = ''
 
     total_amount = 0
-    for id, pair in enumerate(keys):
-        key_pair = pair.split(':')
-        if len(key_pair) == 2:
-            key, address = key_pair
-        else:
-            key, address = *key_pair, None
-        account = Account(key, id=id+1, address_to=address, chain=claim_chain)
-        match module:
-            case 'claim':
-                await account.claim()
-            case 'check':
-                total_amount+=await account.get_amount()
-            case _:
-                await account.transfer()
+    for batch in get_batches():
+        tasks = []
+        for key in batch:
+            key_data = key.split(';')
+            address_to_send = key_data[2] if key_data[2] != '' else ''
+            proxy = key_data[3] if key_data[3] != '' else ''
+            worker: BaseProject = project.__call__(key=key_data[1], id=key_data[0], address_to=address_to_send, proxy=proxy, chain=chain)
+            match module:
+                case 'claim':
+                    tasks.append(worker.claim())
+                case 'transfer':
+                    tasks.append(worker.transfer())
+                case _:
+                    tasks.append(worker.get_claimable_amount())
+
+        reses = await asyncio.gather(*tasks)
+        if module == 'check':
+            for res in reses: total_amount += res
 
     if module == 'check':
-        logger.success(f'ЭЛИДБЖЛ {total_amount} ZK')
-        return
+        logger.success(f'ЭЛИДБЖЛ {total_amount} {token}')
+
 
 if __name__ == '__main__':
-    modules = questionary.select(
-        "Выберите модули для работы...",
-        choices=[
-            Choice(" 1) КЛЕЙМ", 'claim'),
-            Choice(" 2) ТРАНСФЕР", 't'),
-            Choice(" 3) ЧЕКЕР", 'check'),
-            Choice(" 4) ВЫХОД", 'e'),
-        ],
-        qmark="",
-        pointer="⟹",
-    ).ask()
-    if modules == 'e':
-        sys.exit()
-    asyncio.run(main(modules))
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    while True:
+        project = questionary.select(
+            "Выберите проект для работы...",
+            choices=[
+                Choice(" 1) POLYHEDRA🐸", Projects.poly),
+                Choice(" 2) MEMELAND🥩", Projects.meme),
+                Choice(" 3) ВЫХОД", 'exit'),
+            ],
+            qmark="",
+            pointer="⟹",
+        ).ask()
+        if project == 'exit':
+            loop.close()
+            sys.exit()
+
+        module = questionary.select(
+            "Выберите модуль для работы...",
+            choices=[
+                Choice(" 1) Клейм", 'claim'),
+                Choice(" 2) Трансфер", 'transfer'),
+                Choice(" 3) Чекер", 'check'),
+                Choice(" 4) ВЫХОД", 'exit'),
+            ],
+            qmark="",
+            pointer="⟹",
+        ).ask()
+        if module == 'exit':
+            loop.close()
+            sys.exit()
+        loop.run_until_complete(main(project, module))
+
+
