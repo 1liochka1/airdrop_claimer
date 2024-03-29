@@ -7,6 +7,7 @@ scans = {
     'eth': 'https://etherscan.io/tx/',
     'opti': 'https://optimistic.etherscan.io/tx/',
     'arbi': 'https://arbiscan.io/tx/',
+    'bsc': 'https://bscscan.com/tx/'
 }
 
 class BaseProject(ABC):

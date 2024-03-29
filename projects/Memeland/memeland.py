@@ -1,6 +1,8 @@
 from eth_utils import to_hex
 
 from core.info import scans, BaseProject
+from core.other_info import get_path
+from core.other_utils import write_eligble
 from core.utils import Account
 from projects.Memeland.info import claim_address, claim_abi, meme_address
 from loguru import logger
@@ -46,7 +48,8 @@ class Memeland(Account, BaseProject):
             return 0
         else:
             amount = data[2] / 10 ** 18
-            logger.success(f'{self.address} - элидбжл {amount} MEME')
+            logger.success(f'{self.acc_info} - элидбжл {amount} MEME')
+            write_eligble(get_path('memeland_eligble.txt', 'wallets_data'), self.account.key)
             return amount
 
     async def claim(self):
@@ -74,3 +77,5 @@ class Memeland(Account, BaseProject):
 
     async def transfer(self):
         return await self.transfer_token(meme_address, 'meme')
+
+

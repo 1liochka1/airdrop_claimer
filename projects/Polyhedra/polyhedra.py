@@ -3,6 +3,8 @@ from eth_utils import to_hex
 from loguru import logger
 
 from core.info import scans, BaseProject
+from core.other_info import get_path
+from core.other_utils import write_eligble
 from core.utils import Account
 from projects.Polyhedra.info import (
     claim_address, claim_abi, zk_address
@@ -39,7 +41,8 @@ class Polyhedra(Account, BaseProject):
 
         for chain in data:
             amount = data[chain][0] / 10 ** 18
-            logger.success(f'{self.address}:{chain} - элидбжл {amount} ZK')
+            logger.success(f'{self.acc_info}:{chain} - элидбжл {amount} ZK')
+            write_eligble(get_path('polyhedra_eligble.txt', 'wallets_data'), self.account.key)
             return amount
 
     async def claim(self):

@@ -19,8 +19,9 @@ from core.info import token_abi, scans
 class Account:
     def __init__(self, key, *, id: str = '1', address_to=None, proxy=None, chain='eth'):
         self.proxy = f'http://{proxy}' if proxy else None
+        self.key = key
         self.w3 = AsyncWeb3(AsyncWeb3.AsyncHTTPProvider(
-            rpcs[chain], request_kwargs={"proxy": self.proxy}), modules={'eth': (AsyncEth,)}, middlewares=[])
+            rpcs[chain],  request_kwargs={"proxy": self.proxy}), modules={'eth': (AsyncEth,)}, middlewares=[])
         self.chain = chain
         self.account = self.w3.eth.account.from_key(key)
         self.address = self.account.address
@@ -88,7 +89,6 @@ class Account:
                 tx = await func_(args).build_transaction(tx_dict)
             gas = await self.w3.eth.gas_price
             if self.chain != 'bsc':
-                gas = int(gas * 1.1)
                 tx['maxPriorityFeePerGas'] = gas
                 tx['maxFeePerGas'] = gas
             else:
@@ -116,7 +116,6 @@ class Account:
             }
             gas = await self.w3.eth.gas_price
             if self.chain != 'bsc':
-                gas = int(gas * 1.1)
                 tx['maxPriorityFeePerGas'] = gas
                 tx['maxFeePerGas'] = gas
             else:
@@ -170,6 +169,7 @@ class Account:
                                                data=self.get_contract(token_address, abi=token_abi).encodeABI(
                                                    'transfer',
                                                    [Web3.to_checksum_address(self.address_to), balance]))
+            if not tx: return
             data = await self.sign_and_send(tx)
             if not data: return
             status, hash_ = data
@@ -196,5 +196,8 @@ class Account:
                     logger.error(f'Ошибка при отправке запроса {url}: {await response.text()}')
                     return
         except Exception as e:
+            print(e)
+            if 'Превышен таймаут семафора' in str(e):
+                return await self.send_request(url, method, params=params, json=json, headers=headers)
             logger.error(f'Ошибка - {e}')
             return

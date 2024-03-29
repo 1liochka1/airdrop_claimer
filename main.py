@@ -52,7 +52,7 @@ async def main(project: Type[BaseProject], module):
             for res in reses: total_amount += res
 
     if module == 'check':
-        logger.success(f'ЭЛИДБЖЛ {total_amount} {token}')
+        logger.success(f'ЭЛИДБЖЛ {total_amount} {token}, записал элиджбл кошельки в wallets_data')
 
 
 if __name__ == '__main__':
