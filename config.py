@@ -9,15 +9,15 @@ shuffle_keys = True
 amount_wallets_in_batch = 1
 
 # гвей ниже которого будет работать скрипт
-gwei = 60
+gwei = 25
 
 # cон после транзакции
-delay = [0, 100]
+delay = [1, 100]
 
 # если нужно клеймить с кастомным гвеем для бск сети (нужна анкр рпц) ставим тут значение
 custom_bsc_gwei = False
 
 # -------------POLYHEDRA-------------
-# bsc eth
+# bsc
 claim_chain_polyhedra = 'bsc'
 

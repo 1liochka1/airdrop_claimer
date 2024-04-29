@@ -18,14 +18,13 @@ class Polyhedra(Account, BaseProject):
 
     async def get_proof(self):
         claim_info = {}
-        for chain in ['eth', 'bsc']:
+        for chain in ['bsc']:
             try:
                 data = await self.send_request(
-                    f'https://pub-88646eee386a4ddb840cfb05e7a8d8a5.r2.dev/{chain}_data/{self.address.lower()[2:5]}.json',
+                    f'https://pub-88646eee386a4ddb840cfb05e7a8d8a5.r2.dev/2nd_data/{self.address.lower()[2:5]}.json',
                     'GET')
                 if not data:
                     continue
-
                 data = data[self.address]
                 claim_info[chain] = [int(data['amount'], 16), int(data['index']), data['proof']]
             except Exception as e:
